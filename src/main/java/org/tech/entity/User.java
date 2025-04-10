@@ -70,9 +70,7 @@ public class User {
 		return role;
 	}
 
-	/**
-	 * Ensures role is stored as "ROLE_ADMIN" or "ROLE_STUDENT" only.
-	 */
+
 	public void setRole(String role) {
 		String normalized = role.toUpperCase().replace("ROLE_", "");
 		switch (normalized) {

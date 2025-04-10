@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.tech.dto.BorrowedBookDTO;
 import org.tech.entity.BorrowedBook;
 import org.tech.service.BorrowService;
 
@@ -51,12 +52,14 @@ public class BorrowController {
         return ResponseEntity.ok(borrowService.getBorrowedBooksByUserAndReturned(email, returned));
     }
 
-    // ✅ ADMIN: Get all borrowed books
     @GetMapping("/admin/borrowed")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<List<BorrowedBook>> getAllBorrowedBooks() {
-        return ResponseEntity.ok(borrowService.getAllBorrowedBooks());
+    public ResponseEntity<List<BorrowedBookDTO>> getAllBorrowedBooks() {
+        List<BorrowedBookDTO> dtoList = borrowService.getAllBorrowedBooks();
+        return ResponseEntity.ok(dtoList);
     }
+
+
 
     // ✅ ADMIN: Filter by returned status (true/false)
     @GetMapping("/admin/borrowed/filter")

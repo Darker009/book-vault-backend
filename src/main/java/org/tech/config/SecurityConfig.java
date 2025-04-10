@@ -47,7 +47,7 @@ public class SecurityConfig {
 
                         // Shared GET access
                         .requestMatchers(HttpMethod.GET, "/api/books/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_STUDENT")
-
+                        .requestMatchers(HttpMethod.GET, "/api/stats/summary").hasAnyAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().denyAll()
                 )

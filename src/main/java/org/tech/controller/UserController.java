@@ -14,6 +14,7 @@ import org.tech.entity.User;
 import org.tech.service.UserService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -87,4 +88,12 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @GetMapping("/students")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<UserResponse>> getAllStudents() {
+        List<UserResponse> students = userService.getAllStudents();
+        return ResponseEntity.ok(students);
+    }
+
 }

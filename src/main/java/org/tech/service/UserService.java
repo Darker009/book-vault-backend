@@ -9,13 +9,16 @@ import org.tech.config.JwtUtil;
 import org.tech.dto.LoginRequest;
 import org.tech.dto.RegisterRequest;
 import org.tech.dto.UpdateProfileRequest;
+import org.tech.dto.UserResponse;
 import org.tech.entity.User;
 import org.tech.entity.UserProfile;
 import org.tech.repository.UserProfileRepository;
 import org.tech.repository.UserRepository;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -112,5 +115,21 @@ public class UserService {
 
         return "Profile updated successfully!";
     }
+
+    public List<UserResponse> getAllStudents() {
+        List<User> students = userRepository.findByRole("ROLE_STUDENT");
+        System.out.println("Fetched students: " + students);
+        return students.stream().map(user -> new UserResponse(
+                user.getId(), user.getEmail(), user.getRole(), user.isProfileUpdated(), user.getUserProfile()
+        )).collect(Collectors.toList());
+    }
+
+    public long getTotalStudentCount() {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getRole().equals("STUDENT"))
+                .count();
+    }
+
+
 
 }

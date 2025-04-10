@@ -5,6 +5,8 @@ public class BookRequest {
     private String author;
     private String section;
     private boolean available;
+    private int quantity;      // ✅ New field
+    private String tags;       // ✅ New field
 
     public BookRequest() {}
 
@@ -47,5 +49,21 @@ public class BookRequest {
 
     public void setAvailable(boolean available) {
         this.available = available;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }

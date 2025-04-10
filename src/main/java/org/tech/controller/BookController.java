@@ -10,6 +10,7 @@ import org.tech.entity.Book;
 import org.tech.service.BookService;
 
 import java.util.List;
+import java.util.Map;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -57,4 +58,11 @@ public class BookController {
     public ResponseEntity<List<Book>> getAllBooks() {
         return ResponseEntity.ok(bookService.getAllBooks());
     }
+
+    @GetMapping("/statistics")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Map<String, Object>> getBookStatistics() {
+        return ResponseEntity.ok(bookService.getBookStatistics());
+    }
+
 }

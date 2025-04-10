@@ -2,6 +2,7 @@ package org.tech.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.tech.dto.BorrowedBookDTO;
 import org.tech.entity.Book;
 import org.tech.entity.BorrowedBook;
 import org.tech.entity.User;
@@ -10,7 +11,10 @@ import org.tech.repository.BorrowedBookRepository;
 import org.tech.repository.UserRepository;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class BorrowService {
@@ -28,8 +32,8 @@ public class BorrowService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new RuntimeException("Book not found with ID: " + bookId));
 
-        if (!book.isAvailable()) {
-            throw new RuntimeException("Book is currently unavailable.");
+        if (book.getQuantity() <= 0) {
+            throw new RuntimeException("Book is currently out of stock.");
         }
 
         User user = userRepository.findByEmail(userEmail)
@@ -48,7 +52,14 @@ public class BorrowService {
 
         BorrowedBook savedBorrow = borrowedBookRepository.save(borrowedBook);
 
-        book.setAvailable(false);
+        // ✅ Update quantity
+        book.setQuantity(book.getQuantity() - 1);
+
+        // ✅ If quantity is 0, mark unavailable
+        if (book.getQuantity() == 0) {
+            book.setAvailable(false);
+        }
+
         bookRepository.save(book);
 
         return "Book borrowed successfully! Borrow ID: " + savedBorrow.getId();
@@ -66,7 +77,15 @@ public class BorrowService {
         borrowedBookRepository.save(borrowedBook);
 
         Book book = borrowedBook.getBook();
-        book.setAvailable(true);
+
+        // ✅ Increase quantity
+        book.setQuantity(book.getQuantity() + 1);
+
+        // ✅ Always mark available if quantity ≥ 1
+        if (book.getQuantity() >= 1) {
+            book.setAvailable(true);
+        }
+
         bookRepository.save(book);
 
         return "Book returned successfully!";
@@ -86,10 +105,19 @@ public class BorrowService {
         return borrowedBookRepository.findByUserAndReturned(user, returned);
     }
 
-    // ✅ Admin: All borrows
-    public List<BorrowedBook> getAllBorrowedBooks() {
-        return borrowedBookRepository.findAll();
+    public List<BorrowedBookDTO> getAllBorrowedBooks() {
+        List<BorrowedBook> borrowedBooks = borrowedBookRepository.findAll();
+
+        return borrowedBooks.stream()
+                .map(BorrowedBookDTO::new)
+                .collect(Collectors.toList());
     }
+
+
+    private boolean calculateOverdue(LocalDate dueDate, boolean returned) {
+        return !returned && dueDate.isBefore(LocalDate.now());
+    }
+
 
     // ✅ Admin: Filter returned or not
     public List<BorrowedBook> getBorrowedBooksByReturnedStatus(boolean returned) {
@@ -107,5 +135,35 @@ public class BorrowService {
         return borrowedBook.getBorrowDate().plusDays(14);
     }
 
-    // You can use this method in frontend as well when you expose dueDate
+    // ✅ Admin Dashboard: Borrow stats per student (email -> count)
+    public Map<String, Long> getBorrowStatsByStudent() {
+        List<BorrowedBook> allBorrows = borrowedBookRepository.findAll();
+
+        return allBorrows.stream()
+                .collect(Collectors.groupingBy(
+                        borrow -> borrow.getUser().getEmail(),
+                        Collectors.counting()
+                ));
+    }
+
+    // ✅ Admin Dashboard: Borrow summary
+    public Map<String, Object> getBorrowSummary() {
+        List<BorrowedBook> borrows = borrowedBookRepository.findAll();
+
+        long totalBorrows = borrows.size();
+        long activeBorrows = borrows.stream()
+                .filter(b -> !b.isReturned())
+                .count();
+        long overdueCount = borrows.stream()
+                .filter(b -> !b.isReturned() &&
+                        b.getBorrowDate().plusDays(14).isBefore(LocalDate.now()))
+                .count();
+
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("totalBorrows", totalBorrows);
+        summary.put("activeBorrows", activeBorrows);
+        summary.put("overdueCount", overdueCount);
+
+        return summary;
+    }
 }

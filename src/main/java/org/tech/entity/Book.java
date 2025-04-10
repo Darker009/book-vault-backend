@@ -2,6 +2,7 @@ package org.tech.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,9 +21,14 @@ public class Book {
 	@Column(nullable = false)
 	private String author;
 
+	@Column(nullable = false)
+	private int quantity = 1;
+
 	private String section;
 
 	private boolean available = true;
+
+	private String tags; // ✅ Optional tags/genres field
 
 	@OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
 	@JsonIgnore
@@ -30,14 +36,15 @@ public class Book {
 
 	public Book() {}
 
-	public Book(String title, String author, String section) {
+	public Book(String title, String author, int quantity, String section) {
 		this.title = title;
 		this.author = author;
 		this.section = section;
+		this.quantity = quantity;
 		this.available = true;
 	}
 
-	// Getters and Setters
+	// 🔽 Getters & Setters
 
 	public Long getId() {
 		return id;
@@ -71,12 +78,28 @@ public class Book {
 		this.section = section;
 	}
 
+	public int getQuantity() {
+		return quantity;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
 	public boolean isAvailable() {
 		return available;
 	}
 
 	public void setAvailable(boolean available) {
 		this.available = available;
+	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 	public List<BorrowedBook> getBorrowedBooks() {
@@ -87,12 +110,30 @@ public class Book {
 		this.borrowedBooks = borrowedBooks;
 	}
 
-	// ✅ Feature vector generation for KNN
+	// ✅ Feature vector for KNN
 	public double[] toFeatureVector() {
-		// Simple hash-based conversion to numeric values
 		double titleFeature = Objects.hash(title) % 1000;
 		double authorFeature = Objects.hash(author) % 1000;
 		double sectionFeature = Objects.hash(section) % 1000;
-		return new double[]{titleFeature, authorFeature, sectionFeature};
+		double tagsFeature = tags != null ? Objects.hash(tags) % 1000 : 0;
+		return new double[]{titleFeature, authorFeature, sectionFeature, tagsFeature};
+	}
+
+	// ✅ Aliases for analytics
+
+	public String getCategory() {
+		return section;
+	}
+
+	public void setCategory(String category) {
+		this.section = category;
+	}
+
+	public String getGenre() {
+		return tags;
+	}
+
+	public void setGenre(String genre) {
+		this.tags = genre;
 	}
 }

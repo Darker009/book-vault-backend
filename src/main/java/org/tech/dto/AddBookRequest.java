@@ -1,19 +1,11 @@
 package org.tech.dto;
 
 public class AddBookRequest {
-    private Long userId; // Passed from frontend to verify role
     private String title;
     private String author;
     private String section;
-    private boolean available;
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
+    private int quantity;      // ✅ Used to determine availability
+    private String tags;       // ✅ Used for KNN features
 
     public String getTitle() {
         return title;
@@ -39,11 +31,19 @@ public class AddBookRequest {
         this.section = section;
     }
 
-    public boolean isAvailable() {
-        return available;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }

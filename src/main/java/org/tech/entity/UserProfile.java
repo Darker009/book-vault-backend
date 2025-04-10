@@ -46,6 +46,11 @@ public class UserProfile {
 		return name;
 	}
 
+	public String getFullName() {
+		return this.name;
+	}
+
+
 	public void setName(String name) {
 		this.name = name;
 	}

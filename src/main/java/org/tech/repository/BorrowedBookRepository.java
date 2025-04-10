@@ -19,5 +19,6 @@ public interface BorrowedBookRepository extends JpaRepository<BorrowedBook, Long
 
     List<BorrowedBook> findByReturned(boolean returned);
 
+    // ✅ Use dueDate for overdue detection
     List<BorrowedBook> findByReturnedFalseAndDueDateBefore(LocalDate date);
 }
